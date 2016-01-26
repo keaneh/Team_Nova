@@ -1,8 +1,6 @@
 # Team_Nova
 We're a blast
 
-Dylan
-
 Team Nova consists of sophomore electrical engineer majors Keane Hamamura, Dylan Tokita and Tyler Yamauchi, mentored by Garrett Young. This team is a part of the newly created
 Vertically Integrated Project Program for SCEL at the University of Hawaii at Mānoa.
 
