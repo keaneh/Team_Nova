@@ -1,4 +1,5 @@
 # Team_Nova
+Keane Hamamura Dylan Tokita Tyler Yamauchi
 We're a blast
 
 Team Nova consists of sophomore electrical engineer majors Keane Hamamura, Dylan Tokita and Tyler Yamauchi, mentored by Garrett Young. This team is a part of the newly created
