@@ -1,0 +1,30 @@
+
+#include <SoftwareSerial.h> //Using SoftwareSerial library
+SoftwareSerial XBee(2, 3); // RX (Receiving), TX (Transmitting)
+
+//Set PAN ID to: DAD on both Xbees using XCTU
+//Set Destination Address Low to: FFFF on both Xbees using XCTU
+
+void setup()
+{
+  XBee.begin(9600); //Start the Xbee at 9600 baud
+  Serial.begin(9600); //Start the serial port at 9600
+  Serial.println("Initializing Xbee");  //Debug to show initialization
+}
+
+void loop()
+{
+  if (Serial.available()) //If Data is inputted into the serial monitor
+  {
+    Serial.print("Sending to Xbee...");
+    while(Serial.available()){
+    XBee.write(Serial.read()); //Send it to the Xbee to transmit out
+    //Serial.println("Sending to XBee"); //Debug
+    }
+  }
+  if (XBee.available()) //If Data is inputted into the Xbee
+  {
+    Serial.write(XBee.read());  //Recieve it from the Xbee to print on serial monitor
+    //Serial.println("Reading from Xbee"); //Debug
+  }
+}
