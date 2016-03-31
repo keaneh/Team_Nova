@@ -1,0 +1,59 @@
+/* Name: Team Nova * Date: 2/23/16 * 
+//Reads temperature and humidity values from SHT1x-series sensors */ 
+//Arduino → Sensor 
+//3.3 V → 8 
+//GND → 4 
+//10 → 1 
+//11 → 3 
+
+#include <SHT1x.h>
+
+#define dataPin 10 
+#define clockPin 11 
+
+sht1x(dataPin, clockPin);
+
+void setup() {
+
+  //Open serial connection
+  Serial.begin(38400);
+  
+  //Display to the user
+  Serial.println("Initializing");
+}
+
+void loop() {
+
+  //Declare variables
+  float temp_c;
+  float temp_f; 
+  float humidity;
+  
+  //Read values from the sensor
+  //sht1x is the object (sensor)
+  temp_c = sht1x.readTemperatureC();
+  temp_f = sht1x.readTemperatureF();
+  humidity = sht1x.readHumidity();
+  
+  //Display Celsius values to the serial port
+  Serial.print("Temperature in Celsius: ");
+  Serial.print(temp_c, DEC);
+  Serial.println("C");
+  
+  //Display Fahrenheit values to the serial port
+  Serial.print("Temperature in Fahrenheit: ");
+  Serial.print(temp_f, DEC);
+  Serial.println("F");
+  
+  //Display Relative Humidity values to the serial port
+  //Note: Humidity is measured in relative humidity, the percentage
+  //represents the amount of water the air currently holds, compared
+  //to the amount of water the air can hold at the current temperature.
+  Serial.print("Relative Humidity: ");
+  Serial.print(humidity);
+  Serial.println("%");
+  Serial.println();
+  
+  //Wait two seconds to get the next reading
+  delay(2000);
+}
