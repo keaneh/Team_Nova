@@ -1,0 +1,32 @@
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+OneWire oneWire(A2);
+
+DallasTemperature sensors(&oneWire);
+DeviceAddress insideThermometer;
+
+void setup() 
+{
+
+  Serial.begin(9600);
+  sensors.begin();
+  //set the address to take temperatures
+  sensors.getAddress(insideThermometer, 0); 
+}
+
+void loop() 
+{
+  //get temperature from sensor
+  sensors.requestTemperatures();
+
+  delay(1000);
+  //get the value of temperature in Celsius and set to tempC
+  float tempC = sensors.getTempC(insideThermometer); 
+
+  Serial.print("Temp C: ");
+  Serial.print(tempC);
+  Serial.print(" Temp F: ");
+  //convert temperature in C to F
+  Serial.println(DallasTemperature::toFahrenheit(tempC));
+}
