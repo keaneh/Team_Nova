@@ -1,0 +1,134 @@
+#include <stdint.h>
+#include <SHT1x.h>
+#include <XBee.h>
+#include <SFE_BMP180.h>
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+
+#define dataPin 10
+#define clockPin 11
+
+//SCHEMA 296 Basic
+typedef struct {
+  uint16_t schema = 296; //Set to 296 (@)
+  uint16_t address = 1; //Address of particular node, assigned by lab (@)
+  uint32_t uptime_ms; //Uptime in ms, how long has microcontroller been on for (@)
+  uint16_t batt_mv; //Battery voltage in millivolts (@)
+  uint16_t panel_mv; //Panel voltage in millivolts (@)
+  uint32_t bmp185_press_pa; //Pressure in pascals (@)
+  int16_t bmp185_temp_decic; //Temperature in deci-celsius (@)
+  uint16_t humidity_centi_pct; //Humidity in centi percents (@)
+  uint16_t solar_irr_w_m2; //Solar irradiance (@)
+} schema_296;
+
+//Initialize schema  
+schema_296 schema;
+
+//Initialize Sensors
+SHT1x sht1x(dataPin, clockPin);
+XBee xbee = XBee();
+Adafruit_BMP085 bmp;
+
+void setup() {
+  //Open serial connection
+  Serial.begin(9600);
+  delay(2500);
+}
+
+void loop() {
+  sampleSensors();
+  constructPacket();
+  delay(5000);
+}
+
+void sampleSensors(){
+  sampleSHT1x();
+  sampleBMP180();
+  sampleUptime();
+  sampleApogee();
+  sampleBattery();
+  samplePanel();
+}
+
+void sampleSHT1x() {
+  //Places in schema
+  schema.humidity_centi_pct = sht1x.readHumidity();
+
+  //Debug
+  Serial.print("Humidity: ");
+  Serial.println(schema.humidity_centi_pct);  
+}
+
+void sampleBMP180() {
+  //Places in schema
+  bmp.begin();
+  schema.bmp185_press_pa = bmp.readPressure();
+  schema.bmp185_temp_decic = bmp.readTemperature();
+
+  //Debug
+  Serial.print("Pressure: ");
+  Serial.println(schema.bmp185_press_pa);
+  Serial.print("Temperature: ");
+  Serial.println(schema.bmp185_temp_decic);
+}
+
+void sampleUptime() {
+  schema.uptime_ms = millis();
+  
+  //Debug
+  Serial.print("Uptime: ");
+  Serial.println(schema.uptime_ms);
+}
+
+void sampleApogee() {
+  schema.solar_irr_w_m2 = (analogRead(A2))/0.004;
+
+  //Debug
+  Serial.print("Solar Irradiance: ");
+  Serial.println(schema.solar_irr_w_m2);
+  
+}
+
+void sampleBattery() {
+  schema.batt_mv = (analogRead(A0)*(5000/1023));
+
+  //Debug
+  Serial.print("Battery Voltage: ");
+  Serial.println(schema.batt_mv);
+}
+
+void samplePanel() {
+  schema.panel_mv = (analogRead(A1)*(5000/1023)+70);
+
+  //Debug
+  Serial.print("Panel Voltage: ");
+  Serial.println(schema.panel_mv);
+}
+
+void constructPacket() {
+  int len = 0;
+
+  uint8_t payload[80]; 
+
+  //Packet construction
+  memset(payload, '\0', sizeof(payload));
+  len = sizeof(schema);
+  memcpy(payload, &schema, len);
+/*
+    Serial.print(("BIN Length is: "));
+   Serial.print(len);
+   Serial.print("\n");
+
+   
+    int i;
+    for(i = 0; i < 80; i++)
+    {
+        Serial.println(payload[i]);
+        Serial.print("\n");
+    }
+*/
+  //Transfer Packet
+  XBeeAddress64 addr64 = XBeeAddress64(0x00, 0x00);
+  ZBTxRequest zbTx = ZBTxRequest(addr64, payload, len);
+  xbee.send(zbTx);
+}
